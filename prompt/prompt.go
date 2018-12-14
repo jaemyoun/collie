@@ -16,9 +16,9 @@ func search(elem func(index int) string) list.Searcher {
 
 func newSelectDraft(mainVar string) promptui.Select {
 	return promptui.Select{
-		Label: "> ",
+		Label: "\U00002714 ",
 		Templates: &promptui.SelectTemplates{
-			Label:    "{{ . }}",
+			Label:    "{{ . }}?",
 			Active:   fmt.Sprintf("\U00002714 {{ .%s | cyan }}", mainVar),
 			Inactive: fmt.Sprintf("  {{ .%s | cyan }}", mainVar),
 			Selected: fmt.Sprintf("\U00002714 {{ .%s | red }}", mainVar),
