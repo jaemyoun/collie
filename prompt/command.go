@@ -42,8 +42,8 @@ func Run() bool {
 
 func getStatus() string {
 	ret := barStringHead + "\n"
-	ret = getStatusForSelectBucket()
-	ret = getStatusForLocation()
+	ret += getStatusForSelectBucket()
+	ret += getStatusForLocation()
 	ret += getStatusForFilter()
 	ret += getStatusForCheckDate()
 	return ret + barString
