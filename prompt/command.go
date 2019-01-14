@@ -17,9 +17,10 @@ var promptCommands = []promptCommandType{
 	{CommandName: "ls", Desc: "List objects", Do: ls},
 	{CommandName: "ls recursively", Desc: "List objects recursively", Do: lsRecursively},
 	{CommandName: "cd", Desc: "Change location (prefix) to list objects", Do: cd},
-	{CommandName: "set filter", Desc: "Add/remove filter", Do: setFilter},
-	{CommandName: "toggle details option", Desc: "Turn on/off printing list objects in details", Do: optionToggleDetails},
-	{CommandName: "check-date", Desc: "Check recent modified date of all objects with filtering", Do: checkDate},
+	{CommandName: "set filters", Desc: "Add/remove filter", Do: setFilter},
+	{CommandName: "set date range", Desc: "Check recent modified date of all objects with filtering", Do: checkDate},
+	{CommandName: "toggle details option", Desc: "Turn on/off printing list objects in details", Do: optionDetails},
+	{CommandName: "toggle duplicated objects", Desc: "Toggle printing only duplicated files in multiple S3 Buckets", Do: optionDuplication},
 }
 
 func Run() bool {
@@ -46,5 +47,7 @@ func getStatus() string {
 	ret += getStatusForLocation()
 	ret += getStatusForFilter()
 	ret += getStatusForCheckDate()
+	ret += getStatusOptionDetails()
+	ret += getStatusOptionCheckDuplicated()
 	return ret + barString
 }

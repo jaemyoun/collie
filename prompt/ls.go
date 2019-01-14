@@ -8,6 +8,7 @@ import (
 	"github.com/jaemyoun/collie/config"
 	"github.com/jaemyoun/collie/gofunc"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -20,6 +21,8 @@ func lsRecursively() {
 }
 
 func listObjectsInGoRoutine(rec bool) {
+	duplicatedManager = duplicatedMangerType{scannedPath: make(map[string]struct{})}
+
 	for bucket, info := range config.GetSelectedBucket() {
 		color.Cyan("%s (%s):\n", bucket, info.Region)
 
@@ -47,7 +50,9 @@ func handleListObjects(input interface{}, output chan<- interface{}, recursiveFu
 	bucket := vars[0].(string)
 	region := vars[1].(string)
 	recursive := vars[2].(bool)
+
 	details := config.GetDetails()
+	duplication := config.GetDuplication()
 
 	pages := aws.ListObjects(bucket, region, prefix)
 	for pages.Next() {
@@ -55,13 +60,20 @@ func handleListObjects(input interface{}, output chan<- interface{}, recursiveFu
 		for _, e := range page.CommonPrefixes {
 			if recursive {
 				recursiveFunc(*e.Prefix)
-			} else if validateFilter(*e.Prefix) {
+			} else if !validateFilter(*e.Prefix) {
+			} else {
 				output <- sPrintCommonPrefixes(e, details)
 			}
 		}
 
 		for _, e := range page.Contents {
-			if validateFilter(*e.Key) && validateDate(e.LastModified) {
+			if *e.Key == *page.Prefix {
+				continue
+			}
+			if !validateFilter(*e.Key) {
+			} else if !validateDate(e.LastModified) {
+			} else if duplication && !duplicatedManager.isDuplicated(*e.Key) {
+			} else {
 				output <- sPrintContents(details, e)
 			}
 		}
@@ -86,4 +98,20 @@ func sPrintContents(details bool, e s3.Object) string {
 	} else {
 		return fmt.Sprintln(*e.Key)
 	}
+}
+
+type duplicatedMangerType struct {
+	lock        sync.Mutex
+	scannedPath map[string]struct{}
+}
+
+var duplicatedManager duplicatedMangerType
+
+func (d *duplicatedMangerType) isDuplicated(path string) bool {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
+	_, ok := d.scannedPath[path]
+	d.scannedPath[path] = struct{}{}
+	return ok
 }

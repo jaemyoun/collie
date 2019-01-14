@@ -12,6 +12,7 @@ var setting = struct {
 	addedFilters    []FilterInfo
 	details         bool
 	checkDate       [2]CheckDateInfo
+	duplication     bool
 }{}
 
 type BucketNameType string
