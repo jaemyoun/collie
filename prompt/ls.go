@@ -53,15 +53,15 @@ func handleListObjects(input interface{}, output chan<- interface{}, recursiveFu
 
 	details := config.GetDetails()
 	duplication := config.GetDuplication()
+	depth := config.GetDepth()
 
 	pages := aws.ListObjects(bucket, region, prefix)
 	for pages.Next() {
 		page := pages.CurrentPage()
 		for _, e := range page.CommonPrefixes {
-			if recursive {
+			if recursive && depth >= 0 && depth > strings.Count(*e.Prefix, "/") {
 				recursiveFunc(*e.Prefix)
-			} else if !validateFilter(*e.Prefix) {
-			} else {
+			} else if validateFilter(*e.Prefix) {
 				output <- sPrintCommonPrefixes(e, details)
 			}
 		}

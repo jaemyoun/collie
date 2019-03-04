@@ -13,6 +13,7 @@ var setting = struct {
 	details         bool
 	checkDate       [2]CheckDateInfo
 	duplication     bool
+	depth           int
 }{}
 
 type BucketNameType string
@@ -50,5 +51,6 @@ var OperationString = []string{"", "==", "!=", "<", "<="}
 func init() {
 	setting.selectedBucket = make(map[BucketNameType]BucketInfo)
 	setting.addedFilters = make([]FilterInfo, 0)
+	setting.depth = -1
 	readConfigFile()
 }

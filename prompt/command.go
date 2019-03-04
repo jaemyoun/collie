@@ -21,6 +21,7 @@ var promptCommands = []promptCommandType{
 	{CommandName: "set date range", Desc: "Check recent modified date of all objects with filtering", Do: checkDate},
 	{CommandName: "toggle details option", Desc: "Turn on/off printing list objects in details", Do: optionDetails},
 	{CommandName: "toggle duplicated objects", Desc: "Toggle printing only duplicated files in multiple S3 Buckets", Do: optionDuplication},
+	{CommandName: "set depth", Desc: "List objects to the specified number of depths", Do: setDepth},
 }
 
 func Run() bool {
@@ -49,5 +50,6 @@ func getStatus() string {
 	ret += getStatusForCheckDate()
 	ret += getStatusOptionDetails()
 	ret += getStatusOptionCheckDuplicated()
+	ret += getStatusForDepth()
 	return ret + barString
 }
