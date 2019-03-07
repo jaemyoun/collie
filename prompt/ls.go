@@ -61,7 +61,9 @@ func handleListObjects(input interface{}, output chan<- interface{}, recursiveFu
 		for _, e := range page.CommonPrefixes {
 			if recursive && depth >= 0 && depth > strings.Count(*e.Prefix, "/") {
 				recursiveFunc(*e.Prefix)
-			} else if validateFilter(*e.Prefix) {
+			} else if !validateFilter(*e.Prefix) {
+			} else if duplication && !duplicatedManager.isDuplicated(*e.Prefix) {
+			} else {
 				output <- sPrintCommonPrefixes(e, details)
 			}
 		}
