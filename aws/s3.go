@@ -1,10 +1,12 @@
 package aws
 
 import (
-	"fmt"
+	"context"
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go-v2/aws/external"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/s3manager"
 	"log"
 	"os"
 )
@@ -14,17 +16,20 @@ var s3service = map[s3.BucketLocationConstraint]*s3.S3{}
 func GetBucketRegion(name string) s3.BucketLocationConstraint {
 	cfg, err := external.LoadDefaultAWSConfig()
 	if err != nil {
-		fmt.Printf("failed to load config, %v\n", err)
-		os.Exit(1)
+		log.Fatalf("failed to load config, %v", err)
 	}
-	req := s3.New(cfg).GetBucketLocationRequest(&s3.GetBucketLocationInput{Bucket: aws.String(name)})
-	resp, err := req.Send()
+	ec2Region, err := ec2metadata.New(cfg).Region()
 	if err != nil {
-		fmt.Println("failed to get bucket location in GetBucketRegion(),", name)
-	} else if len(resp.LocationConstraint) == 0 {
-		fmt.Println("invalid s3 bucket location")
+		ec2Region = "ap-northeast-1"
+	}
+	cfg.Region = ec2Region
+	region, err := s3manager.GetBucketRegion(context.Background(), cfg, name, ec2Region)
+	if err != nil {
+		log.Fatalln("failed to get bucket location in getBucketRegion(),", name, err)
+	} else if len(region) == 0 {
+		log.Fatalln("invalid s3 bucket location")
 	} else {
-		return resp.LocationConstraint
+		return s3.BucketLocationConstraint(region)
 	}
 	return ""
 }
