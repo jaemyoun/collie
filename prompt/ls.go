@@ -9,6 +9,7 @@ import (
 	"github.com/jaemyoun/collie/gofunc"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -40,6 +41,7 @@ func listObjectsInGoRoutine(rec bool) {
 			fmt.Print(output)
 		}
 		fmt.Printf("Request Count: %d, Elapse time: %v\n", routine.GetRunningCount(), time.Since(start))
+		fmt.Printf("Total size: %v\n", totalSize)
 		fmt.Println("")
 	}
 }
@@ -90,7 +92,10 @@ func sPrintCommonPrefixes(e s3.CommonPrefix, details bool) string {
 	}
 }
 
+var totalSize int64
+
 func sPrintContents(details bool, e s3.Object) string {
+	atomic.AddInt64(&totalSize, *e.Size)
 	if details {
 		size := fmt.Sprintf("%d", *e.Size)
 		if len(size) < 10 {
