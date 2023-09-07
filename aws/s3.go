@@ -42,9 +42,12 @@ func ListObjects(bucket, region, prefix string) s3.ListObjectsV2Pager {
 		Prefix:    aws.String(prefix),
 		Delimiter: aws.String("/"),
 	})
+	if req.Error != nil {
+		log.Fatalln("failed to list objects,", req.Error)
+	}
 	pages := req.Paginate()
 	if err := pages.Err(); err != nil {
-		log.Fatalln("failed to list objects,", err)
+		log.Fatalln("failed to page list objects,", err)
 	}
 	return pages
 }
